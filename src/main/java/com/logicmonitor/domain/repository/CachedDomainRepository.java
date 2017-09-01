@@ -68,22 +68,22 @@ public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, C
     }
 
     @Override
-    public void lockRead() {
+    public void acquireReadLock() {
         _lock.readLock().lock();
     }
 
     @Override
-    public void unlockRead() {
+    public void releaseReadLock() {
         _lock.readLock().unlock();
     }
 
     @Override
-    public void lockWrite() {
+    public void acquireWriteLock() {
         _lock.writeLock().lock();
     }
 
     @Override
-    public void unlockWrite() {
+    public void releaseWriteLock() {
         _lock.writeLock().lock();
     }
 

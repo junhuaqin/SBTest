@@ -34,12 +34,12 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
     T get(Class<T> clasz, IT id) {
         try {
-            _center.lockRead();
+            _center.acquireReadLock();
             Node<T, CT, IT> node = findNode(_center, clasz, id);
             return node.getWriting() == null ? node.getCommitted() : node.getWriting();
         }
         finally {
-            _center.unlockRead();
+            _center.releaseReadLock();
         }
     }
 
@@ -58,13 +58,13 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     @Override
     public void commit() throws ContextException {
         try {
-            _center.lockWrite();
+            _center.acquireWriteLock();
             executeOnAllNodes(_writingNodes, Node::commit);
             _center.commit();
             _clear();
         }
         finally {
-            _center.unlockWrite();
+            _center.releaseWriteLock();
         }
     }
 

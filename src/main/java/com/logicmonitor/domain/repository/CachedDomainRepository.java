@@ -17,18 +17,20 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public abstract class CachedDomainRepository<T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
        implements DomainRepository<T, CT, IT> {
     private Class<T> _clasz;
     private final IDGenerator<IT> _idGenerator;
+    private final NodeFactory _nodeFactory;
     private final Map<IT, Node<T, CT, IT>> _repository = new ConcurrentHashMap<>();
     private final Map<IT, Node<T, CT, IT>> _newNodes = new ConcurrentHashMap<>();
     private final Set<IT> _removedNodes = new ConcurrentSkipListSet<>();
     private final ReentrantReadWriteLock _lock = new ReentrantReadWriteLock(true);
 
-    public CachedDomainRepository(Class<T> clasz, IDGenerator<IT> idGenerator) {
+    public CachedDomainRepository(Class<T> clasz, IDGenerator<IT> idGenerator, NodeFactory factory) {
         _clasz = clasz;
         _idGenerator = idGenerator;
+        _nodeFactory = factory;
     }
 
     @Override
@@ -43,7 +45,7 @@ public abstract class CachedDomainRepository<T extends CommandProcessingDomainOb
 
         List<Event> events = domainObject.processCommand(command);
         DomainObjects.applyEventsToMutableDomainObject(domainObject, events);
-        Node<T, CT, IT> node = newNode(id);
+        Node<T, CT, IT> node = _nodeFactory.createNode(_clasz, id);
         node.setWriting(domainObject);
         _newNodes.put(node.getID(), node);
 
@@ -99,10 +101,4 @@ public abstract class CachedDomainRepository<T extends CommandProcessingDomainOb
         _newNodes.clear();
         _removedNodes.clear();
     }
-
-    protected Class<T> getDelegatedClass() {
-        return _clasz;
-    }
-
-    protected abstract Node<T, CT, IT> newNode(IT id);
 }

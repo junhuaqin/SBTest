@@ -4,7 +4,8 @@ import com.logicmonitor.domain.center.DomainCenter;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
 import com.logicmonitor.domain.context.Context;
 import com.logicmonitor.domain.id.IntegerIDGenerator;
-import com.logicmonitor.domain.repository.OneWriteMultiReaderCachedDomainRepository;
+import com.logicmonitor.domain.repository.CachedDomainRepository;
+import com.logicmonitor.domain.repository.OneWriteMultiReaderNodeFactory;
 import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
 import com.logicmonitor.sbtest.domain.device.command.CreateDevice;
@@ -21,9 +22,9 @@ import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 public class App {
     public static void main(String[] args) {
         DomainCenter dc = new OneWriterMultiReaderDomainCenter();
-        dc.register(Device.class, new OneWriteMultiReaderCachedDomainRepository<>(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value()))));
-        dc.register(DeviceGroup.class, new OneWriteMultiReaderCachedDomainRepository<>(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value()))));
-        dc.register(Property.class, new OneWriteMultiReaderCachedDomainRepository<>(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value()))));
+        dc.register(Device.class, new CachedDomainRepository<>(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new OneWriteMultiReaderNodeFactory()));
+        dc.register(DeviceGroup.class, new CachedDomainRepository<>(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new OneWriteMultiReaderNodeFactory()));
+        dc.register(Property.class, new CachedDomainRepository<>(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new OneWriteMultiReaderNodeFactory()));
         Context context = dc.getContext();
         DeviceID deviceID = context.save(Device.class, new CreateDevice("localhost"));
         System.out.println(deviceID.value());

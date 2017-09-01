@@ -1,0 +1,150 @@
+
+//Definition apply plugin
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+//--------------------------------- Based setting  for current project ---------------------------------
+
+// Definition sourceCompatibility and targetCompatibility.
+sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_8
+targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_8
+
+buildscript {
+    ext {
+        MODULE                      = "LMSBTEST"
+        MAVEN_GROUP_ID              = "com.logicmonitor"
+        MAVEN_ARTIFACT_ID           = "lm-sb-test"
+        MAVEN_VERSION               = "0.0.1-2017083101-SNAPSHOT"
+    }
+
+    repositories {
+        maven {
+            credentials {
+                username MAVEN_REPO_USERNAME
+                password MAVEN_REPO_PASSWORD
+            }
+            url REPOSITORRY_URL
+        }
+        jcenter()
+    }
+
+    configurations.all {
+        ResolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+
+    dependencies {
+    }
+
+}
+
+// Access maven center.
+repositories {
+    maven {
+        credentials {
+            username MAVEN_REPO_USERNAME
+            password MAVEN_REPO_PASSWORD
+        }
+        url REPOSITORRY_URL
+    }
+}
+
+// Definition source which should include.
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+// Definition rule which resource should be include.
+processResources {
+    from ('src/main/java')
+    exclude ('**/*.java')
+}
+
+//--------------------------------- Dependencies definition ---------------------------------
+dependencies {
+    compile(
+            "com.google.guava:guava:18.0"
+    )
+
+    runtime(
+    )
+
+    testCompile(
+    )
+}
+
+// Define manifest
+ext.sharedManifest = manifest {
+    attributes(
+            'Modlue': "${MODULE}",
+            'Implementation-Title': "${project.name}",
+            'Built-Date': new Date().getDateTimeString(),
+            'Built-With': "gradle-${project.getGradle().getGradleVersion()}, groovy-${groovy.lang.GroovySystem.getVersion()}",
+            'Created-By': 'Java ' + System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ')'
+    )
+}
+
+//--------------------------------- Specific Tasks ---------------------------------
+/* Define condition for Upload Archives action, do not execute when the provided information is incomplete.
+*  Usage: gradle uploadArchives
+*/
+uploadArchives {
+    repositories {
+        MavenDeployer {
+            pom.groupId = MAVEN_GROUP_ID
+            pom.artifactId = MAVEN_ARTIFACT_ID
+            pom.version = MAVEN_VERSION
+
+            def SUFFIX = pom.version.contains("SNAPSHOT") ? "snapshots" : "Logicmonitor"
+            repository(url: UPLOAD_ARCHIVES_URL + SUFFIX) {
+                authentication(userName: MAVEN_REPO_USERNAME, password: MAVEN_REPO_PASSWORD)
+            }
+        }
+    }
+}
+
+jar {
+    Manifest = project.manifest {
+        from sharedManifest
+    }
+    archivesBaseName = "lm-sb-test"
+}
+
+test {
+    ignoreFailures = false
+}
+
+//Define task sequence
+defaultTasks 'clean','jar'
+
+task devbuild {
+    dependsOn = ['clean','jar']
+}
+
+task build (overwrite: true ) {
+    dependsOn = ['clean','jar']
+}
+
+task upload {
+    dependsOn = ['clean','uploadArchives']
+}
+
+task createDirs {
+    sourceSets*.java.srcDirs*.each { it.mkdirs() }
+    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.groupId = MAVEN_GROUP_ID
+        pom.artifactId = MAVEN_ARTIFACT_ID
+        pom.version = MAVEN_VERSION
+    }
+}

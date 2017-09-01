@@ -23,6 +23,7 @@ build/*
 version.info
 .idea/*
 .gradle/*
+gradle/*
 */*_temp/*
 .sass-cache/
 .idea/

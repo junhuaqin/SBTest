@@ -3,6 +3,7 @@ package com.logicmonitor.domain.context;
 import com.logicmonitor.domain.Command;
 import com.logicmonitor.domain.CommandProcessingDomainObject;
 import com.logicmonitor.domain.Event;
+import com.logicmonitor.domain.TransactionSupport;
 import com.logicmonitor.domain.id.ID;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Created by Robert Qin on 29/08/2017.
  */
-public interface Context {
+public interface Context extends TransactionSupport{
     class ContextException extends RuntimeException {
         public ContextException() {
             super();
@@ -42,5 +43,4 @@ public interface Context {
     void apply(Class<T> clasz, IT id, Event event);
 
     void commit() throws ContextException;
-    void abort();
 }

@@ -2,37 +2,43 @@ package com.logicmonitor.domain.center;
 
 import com.logicmonitor.domain.Command;
 import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.DomainObject;
 import com.logicmonitor.domain.context.Context;
 import com.logicmonitor.domain.context.OneWriterMultiReaderContext;
 import com.logicmonitor.domain.id.ID;
+import com.logicmonitor.domain.id.IDGenerator;
 import com.logicmonitor.domain.repository.DomainRepository;
+import com.logicmonitor.domain.store.JDBCStoreContext;
+import com.logicmonitor.domain.store.SqlMapper;
+import com.logicmonitor.domain.store.StoreContextFactory;
 
+import java.sql.Connection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 
 /**
  * Created by Robert Qin on 01/09/2017.
  */
 public class OneWriterMultiReaderDomainCenter implements DomainCenter {
-    private final Map<Class<? extends CommandProcessingDomainObject>, DomainRepository> _repositories = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock _lock = new ReentrantReadWriteLock(true);
+    private final StoreContextFactory _storeContextFactory;
+    private final RepositoryManager _repositories;
+
+    private OneWriterMultiReaderDomainCenter(final Builder builder) {
+        this._storeContextFactory = () -> new JDBCStoreContext(builder._sqlMappers,
+                                                               builder._connProvider);
+        this._repositories = builder._repositories;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     @Override
     public Context getContext() {
-        return new OneWriterMultiReaderContext(this);
-    }
-
-    @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
-    void register(Class<T> clasz, DomainRepository<T, CT, IT> repository) {
-        _repositories.put(clasz, repository);
-    }
-
-    @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
-    DomainRepository<T, CT, IT> getRepository(Class<T> clasz) {
-        return _repositories.get(clasz);
+        return new Coordinator(new OneWriterMultiReaderContext(this, _repositories), _storeContextFactory.create());
     }
 
     @Override
@@ -56,12 +62,36 @@ public class OneWriterMultiReaderDomainCenter implements DomainCenter {
     }
 
     @Override
-    public void commit() {
-        _repositories.forEach((k, v) -> v.commit());
+    public void commit() throws Exception{
+        for (DomainRepository repository: _repositories.getAll()) {
+            repository.commit();
+        }
     }
 
     @Override
     public void abort() {
-        _repositories.forEach((k, v) -> v.abort());
+        _repositories.getAll().forEach(DomainRepository::abort);
+    }
+
+    public static class Builder {
+        private Map<Class<? extends DomainObject>, SqlMapper<?, ?>> _sqlMappers = new HashMap<>();
+        private Supplier<Connection> _connProvider;
+        private RepositoryManager _repositories = new SimpleRepositoryManager();
+
+        public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+        Builder withDomainObject(Class<T> clasz, IDGenerator<IT> idGenerator, SqlMapper<T, IT> sqlMapper) {
+            _repositories.register(clasz, idGenerator);
+            _sqlMappers.put(clasz, sqlMapper);
+            return this;
+        }
+
+        public Builder withConnProvider(Supplier<Connection> provider) {
+            _connProvider = provider;
+            return this;
+        }
+
+        public OneWriterMultiReaderDomainCenter build() {
+            return new OneWriterMultiReaderDomainCenter(this);
+        }
     }
 }

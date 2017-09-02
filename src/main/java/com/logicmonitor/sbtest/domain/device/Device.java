@@ -20,6 +20,11 @@ public class Device extends ReflectiveMutableCommandProcessingDomainObject<Devic
         _id = id;
     }
 
+    public Device(DeviceID id, String name) {
+        this._id = id;
+        this._name = name;
+    }
+
     @Override
     public DeviceID getID() {
         return _id;
@@ -27,7 +32,7 @@ public class Device extends ReflectiveMutableCommandProcessingDomainObject<Devic
 
     @Override
     public Device copy() {
-        return new Device(_id).applyEvent(new DeviceCreatedEvent(_id, _name));
+        return new Device(_id, _name);
     }
 
     protected List<Event> process(CreateDevice create) {

@@ -11,6 +11,7 @@ public interface DomainRepository<T extends CommandProcessingDomainObject<T, CT,
     Node<T, CT, IT> save(CT command);
     Node<T, CT, IT> find(IT id);
     void remove(IT id);
+    void add(Node<T, CT, IT> node);
 
     IT generateID();
 }

@@ -9,9 +9,7 @@ import com.logicmonitor.domain.id.IDGenerator;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -23,8 +21,6 @@ public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, C
     private final IDGenerator<IT> _idGenerator;
     private final NodeFactory _nodeFactory;
     private final Map<IT, Node<T, CT, IT>> _repository = new ConcurrentHashMap<>();
-    private final Map<IT, Node<T, CT, IT>> _newNodes = new ConcurrentHashMap<>();
-    private final Set<IT> _removedNodes = new ConcurrentSkipListSet<>();
     private final ReentrantReadWriteLock _lock = new ReentrantReadWriteLock(true);
 
     public CachedDomainRepository(Class<T> clasz, IDGenerator<IT> idGenerator, NodeFactory factory) {
@@ -47,19 +43,23 @@ public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, C
         DomainObjects.applyEventsToMutableDomainObject(domainObject, events);
         Node<T, CT, IT> node = _nodeFactory.createNode(_clasz, id);
         node.setWriting(domainObject);
-        _newNodes.put(node.getID(), node);
 
         return node;
     }
 
     @Override
     public Node<T, CT, IT> find(IT id) {
-        return _newNodes.getOrDefault(id, _repository.get(id));
+        return _repository.get(id);
     }
 
     @Override
     public void remove(IT id) {
-        _removedNodes.add(id);
+        _repository.remove(id);
+    }
+
+    @Override
+    public void add(Node<T, CT, IT> node) {
+        _repository.put(node.getID(), node);
     }
 
     @Override
@@ -88,17 +88,10 @@ public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, C
     }
 
     @Override
-    public void commit() {
-        _repository.putAll(_newNodes);
-        _newNodes.clear();
-
-        _removedNodes.forEach(_repository::remove);
-        _removedNodes.clear();
+    public void commit() throws Exception{
     }
 
     @Override
     public void abort() {
-        _newNodes.clear();
-        _removedNodes.clear();
     }
 }

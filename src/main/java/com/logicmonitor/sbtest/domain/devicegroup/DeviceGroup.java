@@ -20,6 +20,11 @@ public class DeviceGroup extends ReflectiveMutableCommandProcessingDomainObject<
         this._id = id;
     }
 
+    public DeviceGroup(DeviceGroupID id, String name) {
+        this._id = id;
+        this._name = name;
+    }
+
     @Override
     public DeviceGroupID getID() {
         return _id;
@@ -27,7 +32,7 @@ public class DeviceGroup extends ReflectiveMutableCommandProcessingDomainObject<
 
     @Override
     public DeviceGroup copy() {
-        return new DeviceGroup(_id).applyEvent(new DeviceGroupCreatedEvent(_id, _name));
+        return new DeviceGroup(_id, _name);
     }
 
     protected List<Event> process(CreateDeviceGroup create) {

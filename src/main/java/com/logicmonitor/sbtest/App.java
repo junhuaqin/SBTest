@@ -4,16 +4,17 @@ import com.logicmonitor.domain.center.DomainCenter;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
 import com.logicmonitor.domain.context.Context;
 import com.logicmonitor.domain.id.IntegerIDGenerator;
-import com.logicmonitor.domain.repository.CachedDomainRepository;
-import com.logicmonitor.domain.repository.OneWriteMultiReaderNodeFactory;
 import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
+import com.logicmonitor.sbtest.domain.device.DeviceSqlMapper;
 import com.logicmonitor.sbtest.domain.device.command.CreateDevice;
 import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroup;
 import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroupID;
+import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroupSqlMapper;
 import com.logicmonitor.sbtest.domain.devicegroup.command.CreateDeviceGroup;
 import com.logicmonitor.sbtest.domain.property.Property;
 import com.logicmonitor.sbtest.domain.property.PropertyID;
+import com.logicmonitor.sbtest.domain.property.PropertySqlMapper;
 import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 
 /**
@@ -21,10 +22,13 @@ import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
  */
 public class App {
     public static void main(String[] args) {
-        DomainCenter dc = new OneWriterMultiReaderDomainCenter();
-        dc.register(Device.class, new CachedDomainRepository<>(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new OneWriteMultiReaderNodeFactory()));
-        dc.register(DeviceGroup.class, new CachedDomainRepository<>(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new OneWriteMultiReaderNodeFactory()));
-        dc.register(Property.class, new CachedDomainRepository<>(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new OneWriteMultiReaderNodeFactory()));
+        DomainCenter dc = OneWriterMultiReaderDomainCenter.builder()
+                .withDomainObject(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new DeviceSqlMapper())
+                .withDomainObject(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new DeviceGroupSqlMapper())
+                .withDomainObject(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new PropertySqlMapper())
+                .withConnProvider(()-> null)
+                .build();
+
         Context context = dc.getContext();
         DeviceID deviceID = context.save(Device.class, new CreateDevice("localhost"));
         System.out.println(deviceID.value());

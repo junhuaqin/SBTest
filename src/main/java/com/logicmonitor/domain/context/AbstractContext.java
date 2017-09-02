@@ -2,8 +2,8 @@ package com.logicmonitor.domain.context;
 
 import com.logicmonitor.domain.Command;
 import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.center.RepositoryManager;
 import com.logicmonitor.domain.id.ID;
-import com.logicmonitor.domain.center.DomainCenter;
 import com.logicmonitor.domain.repository.Node;
 
 import java.util.Objects;
@@ -32,7 +32,7 @@ public abstract class AbstractContext implements Context {
     }
 
     protected  <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
-    Node<T, CT, IT> findNode(DomainCenter store, Class<T> clasz, IT id) {
-        return store.getRepository(clasz).find(id);
+    Node<T, CT, IT> findNode(RepositoryManager manager, Class<T> clasz, IT id) {
+        return manager.getRepository(clasz).find(id);
     }
 }

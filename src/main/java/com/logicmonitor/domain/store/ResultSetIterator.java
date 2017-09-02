@@ -1,6 +1,6 @@
 package com.logicmonitor.domain.store;
 
-import com.logicmonitor.domain.DomainObject;
+import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.id.ID;
 
 import java.sql.Connection;
@@ -12,7 +12,7 @@ import java.util.Iterator;
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public class ResultSetIterator<T extends DomainObject<T, IT>, IT extends ID>
+public class ResultSetIterator<T extends Aggregate<T, IT>, IT extends ID>
         implements Iterator<StoreEntity<T, IT>> {
     private final Connection _connection;
     private final String _sql;

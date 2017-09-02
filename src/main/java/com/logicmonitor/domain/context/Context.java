@@ -1,7 +1,7 @@
 package com.logicmonitor.domain.context;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.Event;
 import com.logicmonitor.domain.TransactionSupport;
 import com.logicmonitor.domain.id.ID;
@@ -30,16 +30,16 @@ public interface Context extends TransactionSupport{
         }
     }
 
-    <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     IT save(Class<T> clasz, CT createCommand);
 
-    <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     T get(Class<T> clasz, IT id);
 
-    <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     List<Event> process(Class<T> clasz, IT id, CT command);
 
-    <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     void apply(Class<T> clasz, IT id, Event event);
 
     void commit() throws ContextException;

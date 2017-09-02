@@ -1,13 +1,13 @@
 package com.logicmonitor.domain.repository;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.id.ID;
 
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public abstract class AbstractNode<T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+public abstract class AbstractNode<T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
         implements Node<T, CT, IT> {
     private final Class<T> _clasz;
     private final IT _id;

@@ -1,13 +1,13 @@
 package com.logicmonitor.domain.center;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
-import com.logicmonitor.domain.DomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
+import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.context.Context;
 import com.logicmonitor.domain.context.OneWriterMultiReaderContext;
 import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.id.IDGenerator;
-import com.logicmonitor.domain.repository.DomainRepository;
+import com.logicmonitor.domain.repository.AggregateRepository;
 import com.logicmonitor.domain.store.JDBCStoreContext;
 import com.logicmonitor.domain.store.SqlMapper;
 import com.logicmonitor.domain.store.StoreContextFactory;
@@ -63,23 +63,23 @@ public class OneWriterMultiReaderDomainCenter implements DomainCenter {
 
     @Override
     public void commit() throws Exception{
-        for (DomainRepository repository: _repositories.getAll()) {
+        for (AggregateRepository repository: _repositories.getAll()) {
             repository.commit();
         }
     }
 
     @Override
     public void abort() {
-        _repositories.getAll().forEach(DomainRepository::abort);
+        _repositories.getAll().forEach(AggregateRepository::abort);
     }
 
     public static class Builder {
-        private Map<Class<? extends DomainObject>, SqlMapper<?, ?>> _sqlMappers = new HashMap<>();
+        private Map<Class<? extends Aggregate>, SqlMapper<?, ?>> _sqlMappers = new HashMap<>();
         private Supplier<Connection> _connProvider;
         private RepositoryManager _repositories = new SimpleRepositoryManager();
 
-        public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
-        Builder withDomainObject(Class<T> clasz, IDGenerator<IT> idGenerator, SqlMapper<T, IT> sqlMapper) {
+        public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+        Builder withAggregate(Class<T> clasz, IDGenerator<IT> idGenerator, SqlMapper<T, IT> sqlMapper) {
             _repositories.register(clasz, idGenerator);
             _sqlMappers.put(clasz, sqlMapper);
             return this;

@@ -1,6 +1,6 @@
 package com.logicmonitor.domain.store;
 
-import com.logicmonitor.domain.DomainObject;
+import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.id.ID;
 
 import java.lang.reflect.Constructor;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Robert Qin on 02/09/2017.
  */
-public abstract class AbstractSqlMapper<T extends DomainObject<T, IT>, IT extends ID>
+public abstract class AbstractSqlMapper<T extends Aggregate<T, IT>, IT extends ID>
         implements SqlMapper<T, IT> {
     protected interface RS2Field<E> {
         E apply(ResultSet rs, String col) throws SQLException;
@@ -49,13 +49,13 @@ public abstract class AbstractSqlMapper<T extends DomainObject<T, IT>, IT extend
         }
     }
 
-    protected abstract List<FieldTblMapper> getDomainObjectFields();
-    protected abstract IDTblMapper getDomainObjectIDField();
+    protected abstract List<FieldTblMapper> getAggregateFields();
+    protected abstract IDTblMapper getAggregateIDField();
     protected abstract String getTblName();
-    protected abstract Class<T> getDomainObjectClass();
+    protected abstract Class<T> getAggregateClass();
 
     protected String concatFields(Function<FieldTblMapper, String> mapper) {
-        return getDomainObjectFields()
+        return getAggregateFields()
                 .stream()
                 .map(mapper::apply)
                 .collect(Collectors.joining(","));
@@ -75,15 +75,15 @@ public abstract class AbstractSqlMapper<T extends DomainObject<T, IT>, IT extend
 
     @Override
     public StoreEntity<T, IT> rowAs(ResultSet rs) throws SQLException {
-        IDTblMapper idMapper = getDomainObjectIDField();
+        IDTblMapper idMapper = getAggregateIDField();
         IT id = idMapper.rs2Field.apply(rs, idMapper.name);
         List<Object> fields = new LinkedList<>();
-        for (FieldTblMapper mapper : getDomainObjectFields()) {
+        for (FieldTblMapper mapper : getAggregateFields()) {
             fields.add(mapper.rs2Field.apply(rs, mapper.name));
         }
 
         int n = fields.size() + 1; // fields and id
-        for (Constructor<?> c : getDomainObjectClass().getDeclaredConstructors()) {
+        for (Constructor<?> c : getAggregateClass().getDeclaredConstructors()) {
             if (n == c.getParameterTypes().length) {
                 try {
                     return new StoreEntity<>(id, ((Constructor<T>) c).newInstance(id, fields));
@@ -95,13 +95,13 @@ public abstract class AbstractSqlMapper<T extends DomainObject<T, IT>, IT extend
         }
 
         throw new RuntimeException(
-                "constructor with number of parameters=" + n + "  not found in " + getDomainObjectClass());
+                "constructor with number of parameters=" + n + "  not found in " + getAggregateClass());
     }
 
     @Override
     public String getQueryAllSql() {
         return String.format("SELECT %s,%s FROM %s",
-                getDomainObjectIDField().name,
+                getAggregateIDField().name,
                 listFields(),
                 getTblName());
     }
@@ -109,42 +109,42 @@ public abstract class AbstractSqlMapper<T extends DomainObject<T, IT>, IT extend
     @Override
     public String getQueryOneSql() {
         return String.format("SELECT %s,%s FROM %s WHERE %s=?",
-                getDomainObjectIDField().name,
+                getAggregateIDField().name,
                 listFields(),
                 getTblName(),
-                getDomainObjectIDField().name);
+                getAggregateIDField().name);
     }
 
     @Override
     public void bindQueryOne(PreparedStatement statement, IT id) throws SQLException {
-        getDomainObjectIDField().binder.apply(statement, id, 1);
+        getAggregateIDField().binder.apply(statement, id, 1);
     }
 
     @Override
     public String getAddSql() {
         return String.format("INSERT INTO %s(%s,%s) VALUES (?,%s)",
                 getTblName(),
-                getDomainObjectIDField().name,
+                getAggregateIDField().name,
                 listFields(),
                 createHoldersForFields());
     }
 
     @Override
     public void bindAdd(PreparedStatement statement, StoreEntity<T, IT> entity) throws SQLException {
-        getDomainObjectIDField().binder.apply(statement, entity.getId(), 1);
-        _bindAll(statement, entity.getObject(), 2);
+        getAggregateIDField().binder.apply(statement, entity.getId(), 1);
+        _bindAll(statement, entity.getAggregate(), 2);
     }
 
     @Override
     public String getDeleteSql() {
         return String.format("DELETE FROM %s WHERE %s=?",
                 getTblName(),
-                getDomainObjectIDField().name);
+                getAggregateIDField().name);
     }
 
     @Override
     public void bindDelete(PreparedStatement statement, IT id) throws SQLException {
-        getDomainObjectIDField().binder.apply(statement, id, 1);
+        getAggregateIDField().binder.apply(statement, id, 1);
     }
 
     @Override
@@ -152,18 +152,18 @@ public abstract class AbstractSqlMapper<T extends DomainObject<T, IT>, IT extend
         return String.format("UPDATE %s SET %s WHERE %s=?",
                 getTblName(),
                 createHoldersWithFieldsName(),
-                getDomainObjectIDField().name);
+                getAggregateIDField().name);
     }
 
     @Override
     public void bindUpdate(PreparedStatement statement, StoreEntity<T, IT> entity) throws SQLException {
-        int nextIndex = _bindAll(statement, entity.getObject(), 1);
-        getDomainObjectIDField().binder.apply(statement, entity.getId(), nextIndex);
+        int nextIndex = _bindAll(statement, entity.getAggregate(), 1);
+        getAggregateIDField().binder.apply(statement, entity.getId(), nextIndex);
     }
 
     private int _bindAll(PreparedStatement statement, T object, int startIndex) throws SQLException {
         int index = startIndex;
-        for (FieldTblMapper mapper : getDomainObjectFields()) {
+        for (FieldTblMapper mapper : getAggregateFields()) {
                 mapper.binder.apply(statement, object, index++);
         }
 

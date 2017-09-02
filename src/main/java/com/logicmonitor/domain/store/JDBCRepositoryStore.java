@@ -1,6 +1,6 @@
 package com.logicmonitor.domain.store;
 
-import com.logicmonitor.domain.DomainObject;
+import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.id.ID;
 
 import java.sql.Connection;
@@ -16,7 +16,7 @@ import java.util.stream.StreamSupport;
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public class JDBCRepositoryStore<T extends DomainObject<T, IT>, IT extends ID>
+public class JDBCRepositoryStore<T extends Aggregate<T, IT>, IT extends ID>
         implements RepositoryStore<T, IT> {
     private final SqlMapper<T, IT> _sqlMapper;
     private final Connection _conn;

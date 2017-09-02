@@ -1,7 +1,7 @@
 package com.logicmonitor.sbtest.domain.property;
 
 import com.logicmonitor.domain.Event;
-import com.logicmonitor.domain.ReflectiveMutableCommandProcessingDomainObject;
+import com.logicmonitor.domain.ReflectiveCommandProcessingAggregate;
 import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 import com.logicmonitor.sbtest.domain.property.command.PropertyCommand;
 import com.logicmonitor.sbtest.domain.property.event.PropertyCreatedEvent;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Robert Qin on 31/08/2017.
  */
-public class Property extends ReflectiveMutableCommandProcessingDomainObject<Property, PropertyCommand, PropertyID> {
+public class Property extends ReflectiveCommandProcessingAggregate<Property, PropertyCommand, PropertyID> {
     private final PropertyID _id;
     private String _key;
     private String _value;

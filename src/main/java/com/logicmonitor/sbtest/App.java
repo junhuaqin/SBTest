@@ -23,9 +23,9 @@ import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 public class App {
     public static void main(String[] args) {
         DomainCenter dc = OneWriterMultiReaderDomainCenter.builder()
-                .withDomainObject(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new DeviceSqlMapper())
-                .withDomainObject(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new DeviceGroupSqlMapper())
-                .withDomainObject(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new PropertySqlMapper())
+                .withAggregate(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new DeviceSqlMapper())
+                .withAggregate(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new DeviceGroupSqlMapper())
+                .withAggregate(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new PropertySqlMapper())
                 .withConnProvider(()-> null)
                 .build();
 

@@ -25,12 +25,12 @@ public class DeviceSqlMapper extends AbstractSqlMapper<Device, DeviceID> {
     }
 
     @Override
-    protected List<FieldTblMapper> getDomainObjectFields() {
+    protected List<FieldTblMapper> getAggregateFields() {
         return _fieldTblMappers;
     }
 
     @Override
-    protected IDTblMapper getDomainObjectIDField() {
+    protected IDTblMapper getAggregateIDField() {
         return _idTblMapper;
     }
 
@@ -40,7 +40,7 @@ public class DeviceSqlMapper extends AbstractSqlMapper<Device, DeviceID> {
     }
 
     @Override
-    protected Class<Device> getDomainObjectClass() {
+    protected Class<Device> getAggregateClass() {
         return Device.class;
     }
 }

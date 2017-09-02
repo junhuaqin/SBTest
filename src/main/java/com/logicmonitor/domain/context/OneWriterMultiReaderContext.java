@@ -1,7 +1,7 @@
 package com.logicmonitor.domain.context;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.Event;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
 import com.logicmonitor.domain.center.RepositoryManager;
@@ -16,8 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class OneWriterMultiReaderContext extends AbstractContext {
     private Set<Node<?, ?, ?>> _writingNodes = new LinkedHashSet<>();
-    private final Map<Class<? extends CommandProcessingDomainObject>, List<ClaszNodeHolder<?, ?, ?>>> _newNodes = new ConcurrentHashMap<>();
-    private final Map<Class<? extends CommandProcessingDomainObject>, List<ClaszNodeHolder<?, ?, ?>>> _removedNodes = new ConcurrentHashMap<>();
+    private final Map<Class<? extends CommandProcessingAggregate>, List<ClaszNodeHolder<?, ?, ?>>> _newNodes = new ConcurrentHashMap<>();
+    private final Map<Class<? extends CommandProcessingAggregate>, List<ClaszNodeHolder<?, ?, ?>>> _removedNodes = new ConcurrentHashMap<>();
     private final OneWriterMultiReaderDomainCenter _center;
     private final RepositoryManager _repositories;
 
@@ -27,7 +27,7 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     IT save(Class<T> clasz, CT createCommand) {
         Node<T, CT, IT> node = _repositories.getRepository(clasz).save(createCommand);
         _writingNodes.add(node);
@@ -36,7 +36,7 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     T get(Class<T> clasz, IT id) {
         try {
             _center.acquireReadLock();
@@ -49,13 +49,13 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     List<Event> process(Class<T> clasz, IT id, CT command) {
         return _makeWriting(findNode(_repositories, clasz, id)).getWriting().processCommand(command);
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     void apply(Class<T> clasz, IT id, Event event) {
         _makeWriting(findNode(_repositories, clasz, id)).getWriting().applyEvent(event);
     }
@@ -91,7 +91,7 @@ public class OneWriterMultiReaderContext extends AbstractContext {
         _clear();
     }
 
-    protected  <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    protected  <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     Node<T, CT, IT> findNode(RepositoryManager manager, Class<T> clasz, IT id) {
         List<ClaszNodeHolder<?, ?, ?>> nodes = _newNodes.get(clasz);
         if (null != nodes) {
@@ -113,7 +113,7 @@ public class OneWriterMultiReaderContext extends AbstractContext {
         _removedNodes.clear();
     }
 
-    private <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    private <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     Node<T, CT, IT> _makeWriting(Node<T, CT, IT> node) {
         if (null == node.getWriting()) {
             node.setWriting(node.getCommitted().copy());
@@ -123,7 +123,7 @@ public class OneWriterMultiReaderContext extends AbstractContext {
         return node;
     }
 
-    private class ClaszNodeHolder<T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID> {
+    private class ClaszNodeHolder<T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> {
         private Class<T> _clasz;
         private Node<T, CT, IT> _node;
 

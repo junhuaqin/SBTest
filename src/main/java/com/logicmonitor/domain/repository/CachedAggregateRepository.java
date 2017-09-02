@@ -1,8 +1,8 @@
 package com.logicmonitor.domain.repository;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
-import com.logicmonitor.domain.DomainObjects;
+import com.logicmonitor.domain.CommandProcessingAggregate;
+import com.logicmonitor.domain.Aggregates;
 import com.logicmonitor.domain.Event;
 import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.id.IDGenerator;
@@ -15,15 +15,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
-       implements DomainRepository<T, CT, IT> {
+public class CachedAggregateRepository<T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+       implements AggregateRepository<T, CT, IT> {
     private Class<T> _clasz;
     private final IDGenerator<IT> _idGenerator;
     private final NodeFactory _nodeFactory;
     private final Map<IT, Node<T, CT, IT>> _repository = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock _lock = new ReentrantReadWriteLock(true);
 
-    public CachedDomainRepository(Class<T> clasz, IDGenerator<IT> idGenerator, NodeFactory factory) {
+    public CachedAggregateRepository(Class<T> clasz, IDGenerator<IT> idGenerator, NodeFactory factory) {
         _clasz = clasz;
         _idGenerator = idGenerator;
         _nodeFactory = factory;
@@ -40,7 +40,7 @@ public class CachedDomainRepository<T extends CommandProcessingDomainObject<T, C
         }
 
         List<Event> events = domainObject.processCommand(command);
-        DomainObjects.applyEventsToMutableDomainObject(domainObject, events);
+        Aggregates.applyEventsToAggregate(domainObject, events);
         Node<T, CT, IT> node = _nodeFactory.createNode(_clasz, id);
         node.setWriting(domainObject);
 

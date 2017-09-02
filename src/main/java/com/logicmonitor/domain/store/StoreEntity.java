@@ -1,12 +1,12 @@
 package com.logicmonitor.domain.store;
 
-import com.logicmonitor.domain.DomainObject;
+import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.id.ID;
 
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public class StoreEntity<T extends DomainObject<T, IT>, IT extends ID> {
+public class StoreEntity<T extends Aggregate<T, IT>, IT extends ID> {
     private final IT _id;
     private final T _object;
 
@@ -19,7 +19,7 @@ public class StoreEntity<T extends DomainObject<T, IT>, IT extends ID> {
         return _id;
     }
 
-    public T getObject() {
+    public T getAggregate() {
         return _object;
     }
 }

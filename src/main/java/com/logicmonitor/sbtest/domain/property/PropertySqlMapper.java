@@ -30,12 +30,12 @@ public class PropertySqlMapper extends AbstractSqlMapper<Property, PropertyID> {
     }
 
     @Override
-    protected List<FieldTblMapper> getDomainObjectFields() {
+    protected List<FieldTblMapper> getAggregateFields() {
         return _fieldTblMappers;
     }
 
     @Override
-    protected IDTblMapper getDomainObjectIDField() {
+    protected IDTblMapper getAggregateIDField() {
         return _idTblMapper;
     }
 
@@ -45,7 +45,7 @@ public class PropertySqlMapper extends AbstractSqlMapper<Property, PropertyID> {
     }
 
     @Override
-    protected Class<Property> getDomainObjectClass() {
+    protected Class<Property> getAggregateClass() {
         return Property.class;
     }
 }

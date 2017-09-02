@@ -1,7 +1,7 @@
 package com.logicmonitor.domain.context;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.center.RepositoryManager;
 import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.repository.Node;
@@ -31,7 +31,7 @@ public abstract class AbstractContext implements Context {
         stream.forEach(operator);
     }
 
-    protected  <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+    protected  <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     Node<T, CT, IT> findNode(RepositoryManager manager, Class<T> clasz, IT id) {
         return manager.getRepository(clasz).find(id);
     }

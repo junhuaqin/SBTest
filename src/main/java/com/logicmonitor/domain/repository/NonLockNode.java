@@ -1,13 +1,13 @@
 package com.logicmonitor.domain.repository;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.id.ID;
 
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public class NonLockNode<T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
+public class NonLockNode<T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
         extends AbstractNode<T, CT, IT> {
     public NonLockNode(Class<T> clasz, IT id) {
         super(clasz, id);

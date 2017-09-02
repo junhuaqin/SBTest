@@ -1,7 +1,7 @@
 package com.logicmonitor.domain.center;
 
 import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingDomainObject;
+import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.Event;
 import com.logicmonitor.domain.context.Context;
 import com.logicmonitor.domain.id.ID;
@@ -23,24 +23,24 @@ public class Coordinator implements Context{
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID> IT save(Class<T> clasz, CT createCommand) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> IT save(Class<T> clasz, CT createCommand) {
         IT id = _repositoryCntx.save(clasz, createCommand);
         _storeCntx.create(clasz).save(new StoreEntity<>(id, _repositoryCntx.get(clasz, id)));
         return id;
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID> T get(Class<T> clasz, IT id) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> T get(Class<T> clasz, IT id) {
         return _repositoryCntx.get(clasz, id);
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID> List<Event> process(Class<T> clasz, IT id, CT command) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> List<Event> process(Class<T> clasz, IT id, CT command) {
         return _repositoryCntx.process(clasz, id, command);
     }
 
     @Override
-    public <T extends CommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID> void apply(Class<T> clasz, IT id, Event event) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> void apply(Class<T> clasz, IT id, Event event) {
         _repositoryCntx.apply(clasz, id, event);
     }
 

@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * Created by Robert Qin on 30/08/2017.
  */
-public abstract class ReflectiveMutableCommandProcessingDomainObject<T extends ReflectiveMutableCommandProcessingDomainObject<T, CT, IT>, CT extends Command, IT extends ID>
-       implements CommandProcessingDomainObject<T, CT, IT> {
+public abstract class ReflectiveCommandProcessingAggregate<T extends ReflectiveCommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+       implements CommandProcessingAggregate<T, CT, IT> {
     @Override
     public List<Event> processCommand(CT cmd) {
         try {

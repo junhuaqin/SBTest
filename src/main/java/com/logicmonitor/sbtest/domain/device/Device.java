@@ -1,7 +1,7 @@
 package com.logicmonitor.sbtest.domain.device;
 
 import com.logicmonitor.domain.Event;
-import com.logicmonitor.domain.ReflectiveMutableCommandProcessingDomainObject;
+import com.logicmonitor.domain.ReflectiveCommandProcessingAggregate;
 import com.logicmonitor.sbtest.domain.device.command.CreateDevice;
 import com.logicmonitor.sbtest.domain.device.command.DeviceCommand;
 import com.logicmonitor.sbtest.domain.device.event.DeviceCreatedEvent;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Robert Qin on 31/08/2017.
  */
-public class Device extends ReflectiveMutableCommandProcessingDomainObject<Device, DeviceCommand, DeviceID> {
+public class Device extends ReflectiveCommandProcessingAggregate<Device, DeviceCommand, DeviceID> {
     private final DeviceID _id;
     private String _name;
 

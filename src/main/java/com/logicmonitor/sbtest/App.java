@@ -37,7 +37,9 @@ public class App {
         System.out.println(deviceGroupID.value());
         PropertyID propertyID = context.save(Property.class, new CreateProperty("display", "test"));
         System.out.println(propertyID.value());
+        System.out.println(context.get(Property.class, propertyID).getValue());
         context.process(Property.class, propertyID, new SetPropertyValue("test2"));
+        System.out.println(context.get(Property.class, propertyID).getValue());
         context.commit();
         Device device = context.get(Device.class, deviceID);
         System.out.println(device.getName());

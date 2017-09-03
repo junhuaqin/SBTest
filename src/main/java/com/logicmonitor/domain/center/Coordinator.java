@@ -34,7 +34,9 @@ public class Coordinator implements Context{
 
     @Override
     public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> List<Event> process(Class<T> clasz, IT id, CT command) {
-        return _repositoryCntx.process(clasz, id, command);
+        List<Event> events = _repositoryCntx.process(clasz, id, command);
+        events.forEach(n -> apply(clasz, id, n));
+        return events;
     }
 
     public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> void apply(Class<T> clasz, IT id, Event event) {

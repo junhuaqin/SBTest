@@ -1,4 +1,4 @@
-package com.logicmonitor.domain.context;
+package com.logicmonitor.domain.repository;
 
 import com.logicmonitor.domain.Command;
 import com.logicmonitor.domain.CommandProcessingAggregate;
@@ -6,7 +6,6 @@ import com.logicmonitor.domain.Event;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
 import com.logicmonitor.domain.center.RepositoryManager;
 import com.logicmonitor.domain.id.ID;
-import com.logicmonitor.domain.repository.Node;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,13 +50,14 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     @Override
     public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     List<Event> process(Class<T> clasz, IT id, CT command) {
-        return _makeWriting(findNode(_repositories, clasz, id)).getWriting().processCommand(command);
+        return get(clasz, id).processCommand(command);
     }
 
     @Override
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
-    void apply(Class<T> clasz, IT id, Event event) {
-        _makeWriting(findNode(_repositories, clasz, id)).getWriting().applyEvent(event);
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> T applyAndGet(Class<T> clasz, IT id, Event event) {
+        T aggreate = _makeWriting(findNode(_repositories, clasz, id)).getWriting();
+        aggreate.applyEvent(event);
+        return aggreate;
     }
 
     @Override

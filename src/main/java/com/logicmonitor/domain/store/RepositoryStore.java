@@ -17,4 +17,5 @@ public interface RepositoryStore<T extends Aggregate<T, IT>, IT extends ID> {
     Stream<StoreEntity<T, IT>> findAllParallel();
     void delete(IT id);
     void deleteAll(Collection<IT> ids);
+    void update(StoreEntity<T, IT> entity);
 }

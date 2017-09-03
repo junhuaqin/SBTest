@@ -9,5 +9,5 @@ import com.logicmonitor.domain.id.ID;
  */
 public interface StoreContext extends TransactionSupport {
     <T extends Aggregate<T, IT>, IT extends ID>
-    RepositoryStore<T, IT> create(Class<T> clasz);
+    RepositoryStore<T, IT> get(Class<T> clasz);
 }

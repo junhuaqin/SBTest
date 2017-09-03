@@ -1,9 +1,5 @@
-package com.logicmonitor.domain.context;
+package com.logicmonitor.domain;
 
-import com.logicmonitor.domain.Command;
-import com.logicmonitor.domain.CommandProcessingAggregate;
-import com.logicmonitor.domain.Event;
-import com.logicmonitor.domain.TransactionSupport;
 import com.logicmonitor.domain.id.ID;
 
 import java.util.List;
@@ -38,9 +34,6 @@ public interface Context extends TransactionSupport{
 
     <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     List<Event> process(Class<T> clasz, IT id, CT command);
-
-    <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
-    void apply(Class<T> clasz, IT id, Event event);
 
     void commit() throws ContextException;
 }

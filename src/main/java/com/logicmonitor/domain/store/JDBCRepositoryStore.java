@@ -20,6 +20,7 @@ public class JDBCRepositoryStore<T extends Aggregate<T, IT>, IT extends ID>
         implements RepositoryStore<T, IT> {
     private final SqlMapper<T, IT> _sqlMapper;
     private final Connection _conn;
+
     public JDBCRepositoryStore(final Connection conn, final SqlMapper<T, IT> sqlMapper) {
         _conn = conn;
         _sqlMapper = sqlMapper;
@@ -79,6 +80,11 @@ public class JDBCRepositoryStore<T extends Aggregate<T, IT>, IT extends ID>
     @Override
     public void deleteAll(Collection<IT> ids) {
         _executeUpdateBatch(_sqlMapper.getDeleteSql(), ids, _sqlMapper::bindDelete);
+    }
+
+    @Override
+    public void update(StoreEntity<T, IT> entity) {
+        _executeUpdateOnce(_sqlMapper.getUpdateSql(), entity, _sqlMapper::bindUpdate);
     }
 
     private interface Binder<E> {

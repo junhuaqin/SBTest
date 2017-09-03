@@ -51,6 +51,7 @@ public abstract class AbstractNode<T extends CommandProcessingAggregate<T, CT, I
 
     @Override
     public void commit() {
+        _writing.makeImmutable();
         _committed = _writing;
         _writing = null;
     }

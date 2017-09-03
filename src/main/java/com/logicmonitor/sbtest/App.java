@@ -2,7 +2,7 @@ package com.logicmonitor.sbtest;
 
 import com.logicmonitor.domain.center.DomainCenter;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
-import com.logicmonitor.domain.context.Context;
+import com.logicmonitor.domain.Context;
 import com.logicmonitor.domain.id.IntegerIDGenerator;
 import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
@@ -16,6 +16,7 @@ import com.logicmonitor.sbtest.domain.property.Property;
 import com.logicmonitor.sbtest.domain.property.PropertyID;
 import com.logicmonitor.sbtest.domain.property.PropertySqlMapper;
 import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
+import com.logicmonitor.sbtest.domain.property.command.SetPropertyValue;
 
 /**
  * Created by Robert Qin on 31/08/2017.
@@ -36,6 +37,7 @@ public class App {
         System.out.println(deviceGroupID.value());
         PropertyID propertyID = context.save(Property.class, new CreateProperty("display", "test"));
         System.out.println(propertyID.value());
+        context.process(Property.class, propertyID, new SetPropertyValue("test2"));
         context.commit();
         Device device = context.get(Device.class, deviceID);
         System.out.println(device.getName());

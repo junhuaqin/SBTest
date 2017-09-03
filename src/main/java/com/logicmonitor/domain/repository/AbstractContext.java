@@ -1,10 +1,9 @@
-package com.logicmonitor.domain.context;
+package com.logicmonitor.domain.repository;
 
 import com.logicmonitor.domain.Command;
 import com.logicmonitor.domain.CommandProcessingAggregate;
 import com.logicmonitor.domain.center.RepositoryManager;
 import com.logicmonitor.domain.id.ID;
-import com.logicmonitor.domain.repository.Node;
 
 import java.util.Objects;
 import java.util.Set;
@@ -14,8 +13,9 @@ import java.util.stream.Stream;
 /**
  * Created by Robert Qin on 01/09/2017.
  */
-public abstract class AbstractContext implements Context {
+public abstract class AbstractContext implements RepositoryContext {
     private static final int _PARALLEL_LIMIT = 100;
+
     protected void executeOnAllNodes(Set<Node<?, ?, ?>> nodes, Consumer<Node<?, ?, ?>> operator) {
         Objects.requireNonNull(nodes);
         Objects.requireNonNull(operator);

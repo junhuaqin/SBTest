@@ -14,6 +14,7 @@ import java.util.function.Supplier;
  */
 public class JDBCStoreContext implements StoreContext{
     private final Map<Class<? extends Aggregate>, SqlMapper<?, ?>> _sqlMappers;
+    private final Map<Class<? extends Aggregate>, JDBCRepositoryStore<?,?>> _stores = new ConcurrentHashMap<>();
     private final Supplier<Connection> _connProvider;
     private Connection _conn;
 
@@ -24,8 +25,10 @@ public class JDBCStoreContext implements StoreContext{
     }
 
     @Override
-    public <T extends Aggregate<T, IT>, IT extends ID> RepositoryStore<T, IT> create(Class<T> clasz) {
-        return new JDBCRepositoryStore<>(_getConn(), (SqlMapper<T, IT>) _sqlMappers.get(clasz));
+    public <T extends Aggregate<T, IT>, IT extends ID> RepositoryStore<T, IT> get(Class<T> clasz) {
+        return (RepositoryStore<T, IT>) _stores.computeIfAbsent(clasz, k ->
+                new JDBCRepositoryStore<>(_getConn(), (SqlMapper<T, IT>) _sqlMappers.get(clasz))
+        );
     }
 
     @Override
@@ -41,6 +44,9 @@ public class JDBCStoreContext implements StoreContext{
     }
 
     private synchronized Connection _getConn() {
-        return Optional.ofNullable(_conn).orElseGet(_connProvider);
+        return Optional.ofNullable(_conn).orElseGet(() -> {
+            _conn = _connProvider.get();
+            return _conn;
+        });
     }
 }

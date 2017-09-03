@@ -8,4 +8,6 @@ import com.logicmonitor.domain.id.ID;
 public interface Aggregate<T, IT extends ID> {
     IT getID();
     T copy();
+    AggregateStatus getStatus();
+    void makeImmutable();
 }

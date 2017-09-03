@@ -37,7 +37,7 @@ public class Device extends BaseAggregate<Device, DeviceCommand, DeviceID> {
     }
 
     protected List<Event> process(CreateDevice create) {
-        return Collections.singletonList(new DeviceCreatedEvent(_id, create.getName()));
+        return Collections.singletonList(new DeviceCreatedEvent(create.getName()));
     }
 
     protected void apply(DeviceCreatedEvent event) {

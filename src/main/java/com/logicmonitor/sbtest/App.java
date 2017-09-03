@@ -1,8 +1,9 @@
 package com.logicmonitor.sbtest;
 
+import com.logicmonitor.domain.Context;
+import com.logicmonitor.domain.EventEnvelope;
 import com.logicmonitor.domain.center.DomainCenter;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
-import com.logicmonitor.domain.Context;
 import com.logicmonitor.domain.id.IntegerIDGenerator;
 import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
@@ -17,6 +18,8 @@ import com.logicmonitor.sbtest.domain.property.PropertyID;
 import com.logicmonitor.sbtest.domain.property.PropertySqlMapper;
 import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 import com.logicmonitor.sbtest.domain.property.command.SetPropertyValue;
+
+import java.util.List;
 
 /**
  * Created by Robert Qin on 31/08/2017.
@@ -38,9 +41,17 @@ public class App {
         PropertyID propertyID = context.save(Property.class, new CreateProperty("display", "test"));
         System.out.println(propertyID.value());
         System.out.println(context.get(Property.class, propertyID).getValue());
-        context.process(Property.class, propertyID, new SetPropertyValue("test2"));
+        List<EventEnvelope<?, PropertyID>> envelopes = context.process(Property.class, propertyID, new SetPropertyValue("test2"));
+        System.out.print(envelopes.get(0).getEvent());
         System.out.println(context.get(Property.class, propertyID).getValue());
-        context.commit();
+        try {
+            context.commit();
+        }
+        catch (Exception e) {
+            context.abort();
+            e.printStackTrace();
+        }
+
         Device device = context.get(Device.class, deviceID);
         System.out.println(device.getName());
         System.out.println(context.get(DeviceGroup.class, deviceGroupID).getName());

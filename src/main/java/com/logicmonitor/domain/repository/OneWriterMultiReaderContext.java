@@ -54,14 +54,15 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     }
 
     @Override
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> T applyAndGet(Class<T> clasz, IT id, Event event) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    T applyAndGet(Class<T> clasz, IT id, Event event) {
         T aggreate = _makeWriting(findNode(_repositories, clasz, id)).getWriting();
         aggreate.applyEvent(event);
         return aggreate;
     }
 
     @Override
-    public void commit() throws ContextException {
+    public void commit() throws Exception {
         try {
             _center.acquireWriteLock();
             executeOnAllNodes(_writingNodes, Node::commit);
@@ -75,9 +76,6 @@ public class OneWriterMultiReaderContext extends AbstractContext {
 
             _center.commit();
             _clear();
-        }
-        catch (Exception e) {
-            throw new ContextException(e);
         }
         finally {
             _center.releaseWriteLock();

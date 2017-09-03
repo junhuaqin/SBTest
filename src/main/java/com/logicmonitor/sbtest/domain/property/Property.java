@@ -24,6 +24,12 @@ public class Property extends BaseAggregate<Property, PropertyCommand, PropertyI
         this._id = id;
     }
 
+    public Property(PropertyID id, String key, String value) {
+        this._id = id;
+        this._key = key;
+        this._value = value;
+    }
+
     @Override
     public PropertyID getID() {
         return _id;
@@ -31,11 +37,11 @@ public class Property extends BaseAggregate<Property, PropertyCommand, PropertyI
 
     @Override
     public Property copy() {
-        return new Property(_id).applyEvent(new PropertyCreatedEvent(_id, _key, _value));
+        return new Property(_id, _key, _value);
     }
 
     protected List<Event> process(CreateProperty create) {
-        return Collections.singletonList(new PropertyCreatedEvent(_id, create.getKey(), create.getValue()));
+        return Collections.singletonList(new PropertyCreatedEvent(create.getKey(), create.getValue()));
     }
 
     protected List<Event> process(SetPropertyValue setValue) {

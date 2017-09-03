@@ -6,6 +6,7 @@ import com.logicmonitor.domain.repository.RepositoryContext;
 import com.logicmonitor.domain.store.StoreContext;
 import com.logicmonitor.domain.store.StoreEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,25 +22,42 @@ public class Coordinator implements Context{
     }
 
     @Override
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> IT save(Class<T> clasz, CT createCommand) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    IT save(Class<T> clasz, CT createCommand) {
         IT id = _repositoryCntx.save(clasz, createCommand);
         _storeCntx.get(clasz).save(new StoreEntity<>(id, _repositoryCntx.get(clasz, id)));
         return id;
     }
 
     @Override
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> T get(Class<T> clasz, IT id) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    T get(Class<T> clasz, IT id) {
         return _repositoryCntx.get(clasz, id);
     }
 
     @Override
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> List<Event> process(Class<T> clasz, IT id, CT command) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    List<EventEnvelope<?, IT>> process(Class<T> clasz, IT id, CT command) {
         List<Event> events = _repositoryCntx.process(clasz, id, command);
-        events.forEach(n -> apply(clasz, id, n));
-        return events;
+        List<EventEnvelope<?, IT>> envelopes = new ArrayList<>();
+        events.stream()
+                .peek(n -> envelopes.add(new EventEnvelope<Event, IT>() {
+                    @Override
+                    public Event getEvent() {
+                        return n;
+                    }
+
+                    @Override
+                    public IT getEntityID() {
+                        return id;
+                    }
+                }))
+                .forEach(n -> apply(clasz, id, n));
+        return envelopes;
     }
 
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> void apply(Class<T> clasz, IT id, Event event) {
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    void apply(Class<T> clasz, IT id, Event event) {
         T aggregate =_repositoryCntx.applyAndGet(clasz, id, event);
         AggregateStatus status = aggregate.getStatus();
         if (AggregateStatus.DEAD == status) {
@@ -51,13 +69,13 @@ public class Coordinator implements Context{
     }
 
     @Override
-    public void commit() throws ContextException {
+    public void commit() throws Exception {
+        _storeCntx.commit();
         try {
-            _storeCntx.commit();
             _repositoryCntx.commit();
         }
-        catch (Exception e) {
-            throw new ContextException(e);
+        catch (Throwable t) {
+            throw new RuntimeException("unexpected to throw exception from repository");
         }
     }
 

@@ -5,6 +5,8 @@ import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.repository.RepositoryContext;
 import com.logicmonitor.domain.store.StoreContext;
 import com.logicmonitor.domain.store.StoreEntity;
+import com.logicmonitor.domain.view.SimpleViewCenter;
+import com.logicmonitor.domain.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,5 +85,11 @@ public class Coordinator implements Context{
     public void abort() {
         _storeCntx.abort();
         _repositoryCntx.abort();
+    }
+
+    @Override
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID, E extends View<IT>>
+    E getView(Class<T> aggregateClasz, Class<E> viewClasz, IT id) {
+        return new SimpleViewCenter().getView(_repositoryCntx, aggregateClasz, viewClasz, id);
     }
 }

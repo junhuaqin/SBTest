@@ -8,6 +8,7 @@ import com.logicmonitor.domain.id.IntegerIDGenerator;
 import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
 import com.logicmonitor.sbtest.domain.device.DeviceSqlMapper;
+import com.logicmonitor.sbtest.domain.device.DeviceView;
 import com.logicmonitor.sbtest.domain.device.command.CreateDevice;
 import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroup;
 import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroupID;
@@ -18,6 +19,7 @@ import com.logicmonitor.sbtest.domain.property.PropertyID;
 import com.logicmonitor.sbtest.domain.property.PropertySqlMapper;
 import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 import com.logicmonitor.sbtest.domain.property.command.SetPropertyValue;
+import com.logicmonitor.sbtest.domain.property.event.PropertyValueChangedEvent;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class App {
         System.out.println(propertyID.value());
         System.out.println(context.get(Property.class, propertyID).getValue());
         List<EventEnvelope<?, PropertyID>> envelopes = context.process(Property.class, propertyID, new SetPropertyValue("test2"));
-        System.out.print(envelopes.get(0).getEvent());
+        new App().propertyChanged((EventEnvelope<PropertyValueChangedEvent, PropertyID>) envelopes.get(0));
         System.out.println(context.get(Property.class, propertyID).getValue());
         try {
             context.commit();
@@ -52,9 +54,15 @@ public class App {
             e.printStackTrace();
         }
 
+        System.out.println(context.getView(Device.class, DeviceView.class, deviceID).getName());
+
         Device device = context.get(Device.class, deviceID);
         System.out.println(device.getName());
         System.out.println(context.get(DeviceGroup.class, deviceGroupID).getName());
         System.out.println(context.get(Property.class, propertyID).getKey());
+    }
+
+    public void propertyChanged(EventEnvelope<PropertyValueChangedEvent, PropertyID> envelope) {
+        System.out.println(envelope.getEntityID().value() + ":" + envelope.getEvent().getNewValue());
     }
 }

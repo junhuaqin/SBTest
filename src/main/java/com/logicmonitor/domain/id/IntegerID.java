@@ -14,4 +14,9 @@ public class IntegerID extends ID<Integer> {
     public Integer value() {
         return _id;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value());
+    }
 }

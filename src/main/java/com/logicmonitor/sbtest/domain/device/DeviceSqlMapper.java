@@ -1,10 +1,15 @@
 package com.logicmonitor.sbtest.domain.device;
 
+import com.google.common.base.Strings;
 import com.logicmonitor.domain.store.AbstractSqlMapper;
+import com.logicmonitor.sbtest.domain.property.PropertyID;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Robert Qin on 02/09/2017.
@@ -24,6 +29,19 @@ public class DeviceSqlMapper extends AbstractSqlMapper<Device, DeviceID> {
                 new FieldTblMapper("name",
                         ResultSet::getString,
                         (s, o, idx) -> s.setString(idx, o.getName())));
+        _fieldTblMappers.add(
+                new FieldTblMapper("properties",
+                        (rs, col) -> {
+                            String s = rs.getString(col);
+                            if (Strings.isNullOrEmpty(s)) {
+                                return Collections.emptySet();
+                            }
+
+                            String[] ids = s.split(",");
+                            return Arrays.stream(ids).map(Integer::valueOf).map(PropertyID::new).collect(Collectors.toSet());
+                        },
+                        (s, o, idx) -> s.setString(idx, o.getProperties().stream().map(PropertyID::toString).collect(Collectors.joining(","))))
+        );
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
 import com.logicmonitor.sbtest.domain.device.DeviceSqlMapper;
 import com.logicmonitor.sbtest.domain.device.DeviceView;
+import com.logicmonitor.sbtest.domain.device.command.AddPropertyCommand;
 import com.logicmonitor.sbtest.domain.device.command.CreateDevice;
 import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroup;
 import com.logicmonitor.sbtest.domain.devicegroup.DeviceGroupID;
@@ -47,6 +48,8 @@ public class App {
         System.out.println(deviceGroupID.value());
         PropertyID propertyID = context.save(Property.class, new CreateProperty("display", "test"));
         System.out.println(propertyID.value());
+        List<EventEnvelope<?, DeviceID>> envelopes1 = context.process(Device.class, deviceID, new AddPropertyCommand(propertyID, "display", "test"));
+
         System.out.println(context.get(Property.class, propertyID).getValue());
         List<EventEnvelope<?, PropertyID>> envelopes = context.process(Property.class, propertyID, new SetPropertyValue("test2"));
         new App().propertyChanged((PropertyValueChangedEvent)envelopes.get(0).getEvent(), envelopes.get(0).getEntityID());

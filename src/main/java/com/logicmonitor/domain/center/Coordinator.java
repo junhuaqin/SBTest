@@ -10,6 +10,7 @@ import com.logicmonitor.domain.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by Robert Qin on 02/09/2017.
@@ -58,7 +59,7 @@ public class Coordinator implements Context{
         return envelopes;
     }
 
-    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    private <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     void apply(Class<T> clasz, IT id, Event event) {
         T aggregate =_repositoryCntx.applyAndGet(clasz, id, event);
         AggregateStatus status = aggregate.getStatus();
@@ -91,5 +92,11 @@ public class Coordinator implements Context{
     public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID, E extends View<IT>>
     E getView(Class<T> aggregateClasz, Class<E> viewClasz, IT id) {
         return new SimpleViewCenter().getView(_repositoryCntx, aggregateClasz, viewClasz, id);
+    }
+
+    @Override
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID, E extends View<IT>>
+    Stream<E> getAllView(Class<T> aggregateClasz, Class<E> viewClasz) {
+        return new SimpleViewCenter().getAllView(_repositoryCntx, aggregateClasz, viewClasz);
     }
 }

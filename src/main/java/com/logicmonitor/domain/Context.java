@@ -4,6 +4,7 @@ import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.view.View;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by Robert Qin on 29/08/2017.
@@ -20,4 +21,7 @@ public interface Context extends TransactionSupport{
 
     <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID, E extends View<IT>>
     E getView(Class<T> aggregateClasz, Class<E> viewClasz, IT id);
+
+    <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID, E extends View<IT>>
+    Stream<E> getAllView(Class<T> aggregateClasz, Class<E> viewClasz);
 }

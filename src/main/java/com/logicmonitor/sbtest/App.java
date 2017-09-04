@@ -60,6 +60,7 @@ public class App {
         }
 
         System.out.println(context.getView(Device.class, DeviceView.class, new DeviceID(1)).getName());
+        context.getAllView(Device.class, DeviceView.class).forEach(n -> System.out.println(n.getID().value() + ":" + n.getName()));
 
         Device device = context.get(Device.class, deviceID);
         System.out.println(device.getName());

@@ -7,6 +7,7 @@ import com.logicmonitor.domain.Event;
 import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.id.IDGenerator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,6 +68,11 @@ public class CachedAggregateRepository<T extends CommandProcessingAggregate<T, C
     @Override
     public Node<T, CT, IT> find(IT id) {
         return _repository.get(id);
+    }
+
+    @Override
+    public Collection<Node<T, CT, IT>> findAll() {
+        return _repository.values();
     }
 
     @Override

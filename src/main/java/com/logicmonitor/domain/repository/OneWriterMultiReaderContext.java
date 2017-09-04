@@ -9,6 +9,7 @@ import com.logicmonitor.domain.id.ID;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by Robert Qin on 30/08/2017.
@@ -40,6 +41,22 @@ public class OneWriterMultiReaderContext extends AbstractContext {
             _center.acquireReadLock();
             Node<T, CT, IT> node = findNode(_repositories, clasz, id);
             return null == node? null : node.getCommitted();
+        }
+        finally {
+            _center.releaseReadLock();
+        }
+    }
+
+    @Override
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
+    Collection<T> getAllImmutable(Class<T> clasz) {
+        try {
+            _center.acquireReadLock();
+            AggregateRepository<T, CT, IT> repositoryStore = _repositories.getRepository(clasz);
+            return repositoryStore.findAll()
+                    .stream()
+                    .map(Node::getCommitted)
+                    .collect(Collectors.toList());
         }
         finally {
             _center.releaseReadLock();

@@ -1,7 +1,7 @@
 package com.logicmonitor.sbtest.domain.device;
 
-import com.logicmonitor.domain.repository.RepositoryContext;
 import com.logicmonitor.domain.view.AbstractView;
+import com.logicmonitor.domain.view.ViewContext;
 import com.logicmonitor.sbtest.domain.device.command.DeviceCommand;
 
 /**
@@ -9,7 +9,7 @@ import com.logicmonitor.sbtest.domain.device.command.DeviceCommand;
  */
 public class DeviceView extends AbstractView<Device, DeviceCommand, DeviceID> {
 
-    public DeviceView(RepositoryContext context, Device device) {
+    public DeviceView(ViewContext context, Device device) {
         super(context, device);
     }
 

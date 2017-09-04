@@ -10,14 +10,16 @@ import java.util.List;
  * Created by Robert Qin on 02/09/2017.
  */
 public class DeviceGroupSqlMapper extends AbstractSqlMapper<DeviceGroup, DeviceGroupID> {
-    private final static String _tblName = "device_groups";
+    private final static String _TBL_NAME = "device_groups";
     private final List<FieldTblMapper> _fieldTblMappers = new ArrayList<>();
     private final IDTblMapper _idTblMapper =
             new IDTblMapper("id",
                             ((rs, col) -> new DeviceGroupID(rs.getInt(col))),
                             (s, id, idx) -> s.setInt(idx, id.value()));
+    private final String _tblName;
 
-    public DeviceGroupSqlMapper() {
+    public DeviceGroupSqlMapper(final String dbName) {
+        _tblName = String.format("%s.%s", dbName, _TBL_NAME);
         _fieldTblMappers.add(
                 new FieldTblMapper("name",
                         ResultSet::getString,

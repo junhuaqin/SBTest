@@ -5,6 +5,7 @@ import com.logicmonitor.domain.EventEnvelope;
 import com.logicmonitor.domain.center.DomainCenter;
 import com.logicmonitor.domain.center.OneWriterMultiReaderDomainCenter;
 import com.logicmonitor.domain.id.IntegerIDGenerator;
+import com.logicmonitor.sbtest.domain.JDBCConnProvider;
 import com.logicmonitor.sbtest.domain.device.Device;
 import com.logicmonitor.sbtest.domain.device.DeviceID;
 import com.logicmonitor.sbtest.domain.device.DeviceSqlMapper;
@@ -21,18 +22,22 @@ import com.logicmonitor.sbtest.domain.property.command.CreateProperty;
 import com.logicmonitor.sbtest.domain.property.command.SetPropertyValue;
 import com.logicmonitor.sbtest.domain.property.event.PropertyValueChangedEvent;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Robert Qin on 31/08/2017.
  */
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        JDBCConnProvider provider = new JDBCConnProvider();
+        provider.initConnectionPool(Collections.emptyMap());
+        String dbName = "sbtest";
         DomainCenter dc = OneWriterMultiReaderDomainCenter.builder()
-                .withAggregate(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new DeviceSqlMapper())
-                .withAggregate(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new DeviceGroupSqlMapper())
-                .withAggregate(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new PropertySqlMapper())
-                .withConnProvider(()-> null)
+                .withAggregate(Device.class, new IntegerIDGenerator<>(n -> new DeviceID(n.value())), new DeviceSqlMapper(dbName))
+                .withAggregate(DeviceGroup.class, new IntegerIDGenerator<>(n -> new DeviceGroupID(n.value())), new DeviceGroupSqlMapper(dbName))
+                .withAggregate(Property.class, new IntegerIDGenerator<>(n -> new PropertyID(n.value())), new PropertySqlMapper(dbName))
+                .withConnProvider(provider::getConn)
                 .build();
 
         Context context = dc.getContext();

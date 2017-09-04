@@ -93,14 +93,14 @@ public class JDBCRepositoryStore<T extends Aggregate<T, IT>, IT extends ID>
 
     private <E> void _executeUpdateOnce(String sql, E obj, Binder<E> binder) {
         System.out.println(sql);
-//        try {
-//            PreparedStatement statement = _conn.prepareStatement(sql);
-//            binder.bind(statement, obj);
-//            statement.executeUpdate();
-//        }
-//        catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            PreparedStatement statement = _conn.prepareStatement(sql);
+            binder.bind(statement, obj);
+            statement.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private <E> void _executeUpdateBatch(String sql, Collection<? extends E> objs, Binder<E> binder) {

@@ -10,16 +10,18 @@ import java.util.List;
  * Created by Robert Qin on 02/09/2017.
  */
 public class PropertySqlMapper extends AbstractSqlMapper<Property, PropertyID> {
-    private final static String _tblName = "properties";
+    private final static String _TBL_NAME = "properties";
     private final List<FieldTblMapper> _fieldTblMappers = new ArrayList<>();
     private final IDTblMapper _idTblMapper =
             new IDTblMapper("id",
                             ((rs, col) -> new PropertyID(rs.getInt(col))),
                             (s, id, idx) -> s.setInt(idx, id.value()));
+    private final String _tblName;
 
-    public PropertySqlMapper() {
+    public PropertySqlMapper(final String dbName) {
+        _tblName = String.format("%s.%s", dbName, _TBL_NAME);
         _fieldTblMappers.add(
-                new FieldTblMapper("key",
+                new FieldTblMapper("keyName",
                         ResultSet::getString,
                         (s, o, idx) -> s.setString(idx, o.getKey())));
 

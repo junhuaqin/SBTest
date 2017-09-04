@@ -8,7 +8,9 @@ import com.logicmonitor.domain.id.ID;
  */
 public interface AggregateRepository<T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
         extends ReentrantReadWriteLockable, TransactionSupport {
+    Class<T> getAggregateClass();
     Node<T, CT, IT> save(CT command);
+    Node<T, CT, IT> saveImmutable(ID id, CommandProcessingAggregate<?,?,?> aggregate);
     Node<T, CT, IT> find(IT id);
     void remove(IT id);
     void add(Node<T, CT, IT> node);

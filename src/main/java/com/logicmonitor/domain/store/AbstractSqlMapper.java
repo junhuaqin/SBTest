@@ -75,18 +75,21 @@ public abstract class AbstractSqlMapper<T extends Aggregate<T, IT>, IT extends I
 
     @Override
     public StoreEntity<T, IT> rowAs(ResultSet rs) throws SQLException {
+        List<Object> fields = new LinkedList<>();
+        
         IDTblMapper idMapper = getAggregateIDField();
         IT id = idMapper.rs2Field.apply(rs, idMapper.name);
-        List<Object> fields = new LinkedList<>();
+        fields.add(id);
+
         for (FieldTblMapper mapper : getAggregateFields()) {
             fields.add(mapper.rs2Field.apply(rs, mapper.name));
         }
 
-        int n = fields.size() + 1; // fields and id
+        int n = fields.size();
         for (Constructor<?> c : getAggregateClass().getDeclaredConstructors()) {
             if (n == c.getParameterTypes().length) {
                 try {
-                    return new StoreEntity<>(id, ((Constructor<T>) c).newInstance(id, fields));
+                    return new StoreEntity<>(id, ((Constructor<T>) c).newInstance(fields.toArray()));
                 }
                 catch (Throwable e) {
                     throw new RuntimeException(e);

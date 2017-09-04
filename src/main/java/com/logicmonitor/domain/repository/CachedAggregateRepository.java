@@ -30,19 +30,36 @@ public class CachedAggregateRepository<T extends CommandProcessingAggregate<T, C
     }
 
     @Override
+    public Class<T> getAggregateClass() {
+        return _clasz;
+    }
+
+    @Override
     public Node<T, CT, IT> save(CT command) {
         IT id = generateID();
-        T domainObject;
+        T aggregate;
         try {
-            domainObject = _clasz.getConstructor(id.getClass()).newInstance(id);
+            aggregate = _clasz.getConstructor(id.getClass()).newInstance(id);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
 
-        List<Event> events = domainObject.processCommand(command);
-        Aggregates.applyEventsToAggregate(domainObject, events);
+        List<Event> events = aggregate.processCommand(command);
+        Aggregates.applyEventsToAggregate(aggregate, events);
         Node<T, CT, IT> node = _nodeFactory.createNode(_clasz, id);
-        node.setWriting(domainObject);
+        node.setWriting(aggregate);
+
+        return node;
+    }
+
+    @Override
+    public Node<T, CT, IT> saveImmutable(ID id, CommandProcessingAggregate<?,?,?> aggregate) {
+        IT nativeId = (IT) id;
+        T nativeAggregate = (T) aggregate;
+        Node<T, CT, IT> node = _nodeFactory.createNode(_clasz, nativeId);
+        node.setCommitted(nativeAggregate);
+        _repository.put(nativeId, node);
+        _idGenerator.setSeed(nativeId);
 
         return node;
     }

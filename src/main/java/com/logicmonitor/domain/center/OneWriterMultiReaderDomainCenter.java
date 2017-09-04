@@ -1,13 +1,13 @@
 package com.logicmonitor.domain.center;
 
+import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.Command;
 import com.logicmonitor.domain.CommandProcessingAggregate;
-import com.logicmonitor.domain.Aggregate;
 import com.logicmonitor.domain.Context;
-import com.logicmonitor.domain.repository.OneWriterMultiReaderContext;
 import com.logicmonitor.domain.id.ID;
 import com.logicmonitor.domain.id.IDGenerator;
 import com.logicmonitor.domain.repository.AggregateRepository;
+import com.logicmonitor.domain.repository.OneWriterMultiReaderContext;
 import com.logicmonitor.domain.store.JDBCStoreContext;
 import com.logicmonitor.domain.store.SqlMapper;
 import com.logicmonitor.domain.store.StoreContextFactory;
@@ -34,6 +34,17 @@ public class OneWriterMultiReaderDomainCenter implements DomainCenter {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    private OneWriterMultiReaderDomainCenter init() throws Exception {
+        for (AggregateRepository<?, ?, ?> repository : _repositories.getAll()) {
+            this._storeContextFactory.create()
+                    .get(repository.getAggregateClass())
+                    .findAll()
+                    .forEach(n -> repository.saveImmutable(n.getId(), n.getAggregate()));
+        }
+
+        return this;
     }
 
     @Override
@@ -90,8 +101,8 @@ public class OneWriterMultiReaderDomainCenter implements DomainCenter {
             return this;
         }
 
-        public OneWriterMultiReaderDomainCenter build() {
-            return new OneWriterMultiReaderDomainCenter(this);
+        public OneWriterMultiReaderDomainCenter build() throws Exception {
+            return new OneWriterMultiReaderDomainCenter(this).init();
         }
     }
 }

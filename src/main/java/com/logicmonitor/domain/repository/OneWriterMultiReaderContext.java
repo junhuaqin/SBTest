@@ -21,8 +21,8 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     private final OneWriterMultiReaderDomainCenter _center;
     private final RepositoryManager _repositories;
 
-    public OneWriterMultiReaderContext(OneWriterMultiReaderDomainCenter store, RepositoryManager repositories) {
-        _center = store;
+    public OneWriterMultiReaderContext(OneWriterMultiReaderDomainCenter center, RepositoryManager repositories) {
+        _center = center;
         _repositories = repositories;
     }
 

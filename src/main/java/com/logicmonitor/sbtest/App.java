@@ -54,7 +54,7 @@ public class App {
             e.printStackTrace();
         }
 
-        System.out.println(context.getView(Device.class, DeviceView.class, deviceID).getName());
+        System.out.println(context.getView(Device.class, DeviceView.class, new DeviceID(1)).getName());
 
         Device device = context.get(Device.class, deviceID);
         System.out.println(device.getName());

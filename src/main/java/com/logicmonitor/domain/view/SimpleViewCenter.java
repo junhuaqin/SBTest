@@ -13,8 +13,10 @@ public class SimpleViewCenter implements ViewCenter {
     public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID, E extends View<IT>>
     E getView(RepositoryContext context, Class<T> aggregateClasz, Class<E> viewClasz, IT id) {
         try {
-            return viewClasz.getConstructor(RepositoryContext.class, aggregateClasz)
-                    .newInstance(context, context.get(aggregateClasz, id));
+            T aggregate = context.getImmutable(aggregateClasz, id);
+            return null == aggregate ? null :
+                    viewClasz.getConstructor(RepositoryContext.class, aggregateClasz)
+                    .newInstance(context, aggregate);
         }
         catch (Throwable e) {
             throw new RuntimeException(e);

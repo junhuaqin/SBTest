@@ -35,11 +35,27 @@ public class OneWriterMultiReaderContext extends AbstractContext {
     }
 
     @Override
+    public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID> T getImmutable(Class<T> clasz, IT id) {
+        try {
+            _center.acquireReadLock();
+            Node<T, CT, IT> node = findNode(_repositories, clasz, id);
+            return null == node? null : node.getCommitted();
+        }
+        finally {
+            _center.releaseReadLock();
+        }
+    }
+
+    @Override
     public <T extends CommandProcessingAggregate<T, CT, IT>, CT extends Command, IT extends ID>
     T get(Class<T> clasz, IT id) {
         try {
             _center.acquireReadLock();
             Node<T, CT, IT> node = findNode(_repositories, clasz, id);
+            if (null == node) {
+                return null;
+            }
+
             return node.getWriting() == null ? node.getCommitted() : node.getWriting();
         }
         finally {

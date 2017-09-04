@@ -49,7 +49,7 @@ public class App {
         System.out.println(propertyID.value());
         System.out.println(context.get(Property.class, propertyID).getValue());
         List<EventEnvelope<?, PropertyID>> envelopes = context.process(Property.class, propertyID, new SetPropertyValue("test2"));
-        new App().propertyChanged((EventEnvelope<PropertyValueChangedEvent, PropertyID>) envelopes.get(0));
+        new App().propertyChanged((PropertyValueChangedEvent)envelopes.get(0).getEvent(), envelopes.get(0).getEntityID());
         System.out.println(context.get(Property.class, propertyID).getValue());
         try {
             context.commit();
@@ -68,7 +68,7 @@ public class App {
         System.out.println(context.get(Property.class, propertyID).getKey());
     }
 
-    public void propertyChanged(EventEnvelope<PropertyValueChangedEvent, PropertyID> envelope) {
-        System.out.println(envelope.getEntityID().value() + ":" + envelope.getEvent().getNewValue());
+    public void propertyChanged(PropertyValueChangedEvent event, PropertyID id) {
+        System.out.println(id.value() + ":" + event.getNewValue());
     }
 }
